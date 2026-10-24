@@ -1,156 +1,97 @@
+"""Root fixtures: isolated application server, API clients, shared role users, per-test worlds."""
 import pytest
-import time
-import requests
-from playwright.sync_api import Page
 
-BASE_URL = "http://127.0.0.1:8000"
+from framework import config
+from framework.client import Client
+from framework.factory import Roles, build_world, register_user
+from framework.server import AppServer
+
+pytest_plugins = ["framework.report", "framework.ui_fixtures"]
 
 
-class APIClient:
-    def __init__(self, base_url=BASE_URL):
-        self.base_url = base_url.rstrip("/")
-        self.session = requests.Session()
+# ---------------------------------------------------------------- server / clients
+@pytest.fixture(scope="session")
+def server():
+    srv = AppServer.from_env().start()
+    yield srv
+    if srv.is_local:
+        srv.stop()
 
-    def register_user(self, full_name="Test User", email=None, password="password123"):
-        if email is None:
-            email = f"test_{int(time.time() * 1000)}@example.com"
 
-        payload = {
-            "full_name": full_name,
-            "email": email,
-            "password": password
-        }
-        res = self.session.post(f"{self.base_url}/api/auth/register", json=payload)
-        return res, email, password
+@pytest.fixture(scope="session")
+def base_url(server):
+    return server.base_url
 
-    def login_user(self, email, password="password123"):
-        # FastAPI OAuth2PasswordRequestForm використовує application/x-www-form-urlencoded
-        return self.session.post(
-            f"{self.base_url}/api/auth/login",
-            data={"username": email, "password": password}
-        )
 
-    def get_auth_token(self, email, password="password123"):
-        res = self.login_user(email, password)
-        if res.status_code == 200:
-            data = res.json()
-            token = data.get("access_token") or data.get("token")
-            user = data.get("user") or {}
-            user_id = user.get("id") or data.get("user_id") or data.get("id")
-            return token, user_id
-        return None, None
-
-    def create_user_and_auth(self, full_name="Test User", email=None, password="password123"):
-        reg_res, email, password = self.register_user(full_name, email, password)
-        user_id = None
-        user_data = {}
-        if reg_res.status_code in (200, 201):
-            try:
-                reg_data = reg_res.json()
-                user_data = reg_data
-                user_id = reg_data.get("id") or (reg_data.get("user") or {}).get("id")
-            except Exception:
-                pass
-
-        token, login_user_id = self.get_auth_token(email, password)
-        if not user_id:
-            user_id = login_user_id
-
-        headers = {"Authorization": f"Bearer {token}"} if token else {}
-        return {
-            "id": user_id,
-            "email": email,
-            "password": password,
-            "token": token,
-            "headers": headers,
-            "register_response": reg_res,
-            "user_data": user_data
-        }
-
-    def create_ticket(self, headers, title="Test Ticket", description="Description", ticket_type="Bug", status="ToDo", priority="Medium"):
-        payload = {
-            "title": title,
-            "description": description,
-            "type": ticket_type,
-            "status": status,
-            "priority": priority
-        }
-        return self.session.post(f"{self.base_url}/api/tickets", json=payload, headers=headers)
+@pytest.fixture(scope="session")
+def anon(base_url) -> Client:
+    return Client(base_url)
 
 
 @pytest.fixture
-def api_client():
-    return APIClient(BASE_URL)
+def db(server):
+    """Direct SQL access to the isolated test database (local server only)."""
+    if not server.is_local:
+        pytest.skip("needs a locally spawned server (BASE_URL mode has no DB access)")
+    return server.sql
 
 
 @pytest.fixture
-def test_user(api_client):
-    user = api_client.create_user_and_auth()
-    yield user
-    # Hard delete cleanup в кінці тесту
-    if user.get("id") and user.get("token"):
-        try:
-            api_client.session.delete(
-                f"{BASE_URL}/api/users/{user['id']}?hard_delete=true",
-                headers={"Authorization": f"Bearer {user['token']}"},
-                timeout=5
-            )
-        except Exception:
-            pass
+def uploads_dir(server):
+    if not server.is_local:
+        pytest.skip("needs a locally spawned server (BASE_URL mode has no filesystem access)")
+    return server.uploads_dir
 
 
-@pytest.fixture(scope="function")
-def authenticated_page(page: Page):
-    # Унікальний email для кожного прогону
-    user_email = f"test_{int(time.time() * 1000)}@example.com"
-    user_password = "password123"
+@pytest.fixture
+def local_server(server):
+    if not server.is_local:
+        pytest.skip("needs a locally spawned server")
+    return server
 
-    page.goto(BASE_URL)
 
-    # Очищуємо localStorage для ізоляції кожного тесту
-    page.evaluate("() => localStorage.clear()")
-    page.reload()
+@pytest.fixture(scope="session")
+def secret_key(server):
+    if not server.is_local:
+        pytest.skip("forging tokens needs the SECRET_KEY of a locally spawned server")
+    return config.SECRET_KEY
 
-    # Перемикаємось на форму реєстрації
-    page.locator("p.cursor-pointer").click()
-    page.fill("input[x-model='authForm.fullName']", "Test User")
-    page.fill("input[x-model='authForm.email']", user_email)
-    page.fill("input[x-model='authForm.password']", user_password)
 
-    # Приймаємо alert про успішну реєстрацію
-    page.once("dialog", lambda dialog: dialog.accept())
-    page.click("button:has-text('Зареєструватися')")
+# ---------------------------------------------------------------- users and projects
+@pytest.fixture(scope="session")
+def roles(base_url, server):
+    """Long-lived users shared by read-mostly tests. Tests that deactivate/delete users create
+    their own throw-away users via `make_user`."""
+    r = Roles(
+        admin=register_user(base_url, "QA Admin", tag="adm_"),
+        editor=register_user(base_url, "QA Editor", tag="edt_"),
+        contributor=register_user(base_url, "QA Contributor", tag="ctr_"),
+        reporter=register_user(base_url, "QA Reporter", tag="rep_"),
+        outsider=register_user(base_url, "QA Outsider", tag="out_"),
+    )
+    yield r
+    if not server.is_local:  # external instance: remove everything the suite created
+        _cleanup_external(base_url, r.admin)
 
-    # Вхід у систему
-    page.fill("input[x-model='authForm.email']", user_email)
-    page.fill("input[x-model='authForm.password']", user_password)
-    page.click("button:has-text('Увійти')")
 
-    # Чекаємо завантаження дошки
-    page.wait_for_selector("h1:has-text('Rapid Task')")
+def _cleanup_external(base_url: str, any_user) -> None:
+    c = any_user.client
+    users = c.get("/api/users").json()
+    for u in users:
+        if u["email"].startswith(config.EMAIL_PREFIX) and u["id"] != any_user.id:
+            c.delete(f"/api/users/{u['id']}", params={"hard_delete": "true"})
+    c.delete(f"/api/users/{any_user.id}", params={"hard_delete": "true"})
 
-    yield page
 
-    # Hard delete cleanup тестового користувача після завершення тесту
-    try:
-        token = page.evaluate("() => localStorage.getItem('token') || localStorage.getItem('access_token') || sessionStorage.getItem('token')")
-        user_data = page.evaluate("() => localStorage.getItem('user') || sessionStorage.getItem('user')")
-        user_id = None
-        if user_data:
-            import json
-            try:
-                user_obj = json.loads(user_data) if isinstance(user_data, str) else user_data
-                user_id = user_obj.get("id") or user_obj.get("user_id")
-            except Exception:
-                pass
+@pytest.fixture
+def world(roles):
+    """Project A (all four roles are members) and project B (separate, owned by the outsider)."""
+    return build_world(roles)
 
-        if token:
-            headers = {"Authorization": f"Bearer {token}"}
-            if not user_id:
-                res = requests.get(f"{BASE_URL}/api/auth/me", headers=headers, timeout=5)
-                if res.status_code == 200:
-                    user_id = res.json().get("id")
-            if user_id:
-                requests.delete(f"{BASE_URL}/api/users/{user_id}?hard_delete=true", headers=headers, timeout=5)
-    except Exception:
-        pass
+
+@pytest.fixture
+def make_user(base_url):
+    """Factory for throw-away users: make_user(tag='x', full_name=None)."""
+    def _make(**kw):
+        return register_user(base_url, **kw)
+    return _make
