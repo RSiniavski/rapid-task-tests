@@ -104,4 +104,13 @@ PLAN = {
     "THEME-06": "Effective theme rules in the UI",
     "THEME-07": "Profile theme selector, import/export UI",
     "THEME-08": "Project Theme tab UI",
+    # --- 13. Tags, components, board filters, initials avatars
+    "LBL-01": "Tags/components API: auth, roles, validation, uniqueness",
+    "LBL-02": "Ticket labels: create/update/history",
+    "LBL-03": "Pending new names: created with the ticket, atomic",
+    "LBL-04": "Clean-up of labels on ticket/project delete",
+    "LBL-05": "parent_id lower bound",
+    "LBL-06": "Board UI: label picker, pending chips, cards",
+    "LBL-07": "Board filters: assignee avatars, panel, persistence",
+    "LBL-08": "Initials avatars and card layout",
 }
