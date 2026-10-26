@@ -105,6 +105,8 @@ def test_legacy_database_is_migrated_with_data_preserved(tmp_path):
         rows = {r[0]: r for r in srv.sql("SELECT id,title,start_date,due_date,status,progress,pos_x,pos_y FROM milestones")}
         assert rows[1][2:] == ("2030-01-01", "2030-02-01", "in_progress", 0, 11.5, 22.5)
         assert rows[2][4:6] == ("done", 100) and rows[3][4] == "planned"
+        closed = dict(srv.sql("SELECT id, closed_at IS NOT NULL FROM milestones"))
+        assert closed[2] == 1 and closed[1] == 0 and closed[3] == 0       # old "done" milestones count as closed
         assert srv.sql("SELECT title FROM tickets WHERE key='LEG-1'") == [("Old ticket",)]
         assert not [r for r in srv.sql("SELECT name FROM sqlite_master WHERE name LIKE 'milestones_legacy%'")]
 

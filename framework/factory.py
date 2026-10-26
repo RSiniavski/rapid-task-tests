@@ -124,9 +124,21 @@ class Project:
                                            json={"column_id": self.columns[column]})).json()
 
     def milestone(self, client: Optional[Client] = None, **fields) -> dict:
+        """Create a milestone. status="done" is not accepted by the API any more (a milestone is
+        finished only by the manual Close action), so it is created and then closed here."""
         payload = {"title": f"M {uid(6)}"}
         payload.update(fields)
-        return ok((client or self.c).post(f"/api/roadmap/project/{self.id}/milestones", json=payload), 201).json()
+        close = payload.get("status") == "done"
+        if close:
+            payload.pop("status")
+        row = ok((client or self.c).post(f"/api/roadmap/project/{self.id}/milestones", json=payload), 201).json()
+        return self.close_milestone(row["id"]) if close else row
+
+    def close_milestone(self, milestone_id: int, client: Optional[Client] = None) -> dict:
+        return ok((client or self.c).post(f"/api/roadmap/milestones/{milestone_id}/close")).json()
+
+    def reopen_milestone(self, milestone_id: int, client: Optional[Client] = None) -> dict:
+        return ok((client or self.c).post(f"/api/roadmap/milestones/{milestone_id}/reopen")).json()
 
     def dependency(self, pred: int, succ: int, type: str = "FS", entity: str = "milestone",
                    client: Optional[Client] = None, expect: int = 201):

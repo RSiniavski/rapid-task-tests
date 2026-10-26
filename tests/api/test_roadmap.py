@@ -85,8 +85,11 @@ def test_create_milestone_with_all_fields(world):
 
 
 @pytest.mark.plan("ROAD-03")
-def test_done_status_without_progress_defaults_to_100(world):
-    assert world.a.milestone(status="done")["progress"] == 100
+def test_done_status_cannot_be_set_on_create_only_by_closing(world):
+    r = world.a.c.post(f"/api/roadmap/project/{world.a.id}/milestones", json={"title": "x", "status": "done"})
+    assert r.status_code == 400 and "Close" in r.json()["detail"]
+    closed = world.a.milestone(status="done")          # helper: create + manual close
+    assert (closed["status"], closed["progress"], closed["is_closed"]) == ("done", 100, True)
 
 
 @pytest.mark.plan("ROAD-03", "ROAD-12")
@@ -152,7 +155,8 @@ def test_update_each_milestone_field(world):
     assert (r["status"], r["progress"]) == ("in_progress", 60)
     r = ok(c.patch(p, json={"pos_x": 10, "pos_y": 20})).json()
     assert (r["pos_x"], r["pos_y"]) == (10.0, 20.0)
-    assert ok(c.patch(p, json={"status": "done"})).json()["progress"] == 100     # done implies 100
+    r = c.patch(p, json={"status": "done"})                                      # done only via Close
+    assert r.status_code == 400 and "Close" in r.json()["detail"]
     assert world.a.milestone_row(m["id"])["title"] == "Renamed"
 
 
@@ -195,7 +199,7 @@ def test_status_and_progress_of_ticket_backed_milestone_are_read_only(world):
     m = world.a.milestone()
     world.a.ticket(milestone_id=m["id"])
     p = f"/api/roadmap/milestones/{m['id']}"
-    for body in ({"status": "done"}, {"progress": 50}):
+    for body in ({"status": "in_progress"}, {"progress": 50}):
         r = world.a.c.patch(p, json=body)
         assert r.status_code == 400 and "automatically" in r.json()["detail"]
     assert ok(world.a.c.patch(p, json={"title": "titles still editable"})).json()["auto_managed"] is True
@@ -465,10 +469,10 @@ def test_movement_outside_first_column_makes_in_progress_with_zero_progress(worl
 
 
 @pytest.mark.plan("ROAD-11")
-@pytest.mark.parametrize("total,done,progress,status", [(1, 1, 100, "done"), (2, 1, 50, "in_progress"),
+@pytest.mark.parametrize("total,done,progress,status", [(1, 1, 100, "in_progress"), (2, 1, 50, "in_progress"),
                                                         (3, 1, 33, "in_progress"), (3, 2, 67, "in_progress"),
-                                                        (4, 4, 100, "done")])
-def test_progress_rounding_and_done_status(world, total, done, progress, status):
+                                                        (4, 4, 100, "in_progress")])
+def test_progress_rounding_and_status_never_auto_done(world, total, done, progress, status):
     m, ts = make_ms_with_tickets(world, total)
     for t in ts[:done]:
         world.a.move(t["id"], "Done")
@@ -481,7 +485,8 @@ def test_reopened_ticket_recalculates_progress_and_status(world):
     m, ts = make_ms_with_tickets(world, 2)
     for t in ts:
         world.a.move(t["id"], "Done")
-    assert world.a.milestone_row(m["id"])["status"] == "done"
+    row = world.a.milestone_row(m["id"])
+    assert (row["status"], row["progress"], row["ready_to_close"]) == ("in_progress", 100, True)
     world.a.move(ts[1]["id"], "Open")
     row = world.a.milestone_row(m["id"])
     assert (row["progress"], row["status"]) == (50, "in_progress")
@@ -495,7 +500,8 @@ def test_column_done_toggle_and_ticket_milestone_moves_recalculate(world):
     m1, m2 = world.a.milestone(), world.a.milestone()
     t = world.a.ticket(milestone_id=m1["id"])
     ok(world.a.c.patch(f"/api/projects/{world.a.id}/columns/{world.a.columns['Open']}", json={"is_done": True}))
-    assert world.a.milestone_row(m1["id"])["status"] == "done"
+    row = world.a.milestone_row(m1["id"])
+    assert (row["status"], row["progress"], row["ready_to_close"]) == ("in_progress", 100, True)
     ok(world.a.c.patch(f"/api/tickets/{t['id']}", json={"milestone_id": m2["id"]}))
     assert world.a.milestone_row(m1["id"])["tickets_total"] == 0
     assert world.a.milestone_row(m2["id"])["tickets_total"] == 1
@@ -558,7 +564,7 @@ def test_completing_predecessor_clears_blocking_and_risk(world):
     world.a.dependency(pred["id"], succ["id"])
     before = world.a.milestone_row(succ["id"])
     assert before["is_blocked"] and before["risk_level"] == "warning" and "upstream_risk" in before["risk_reasons"]
-    ok(world.a.c.patch(f"/api/roadmap/milestones/{pred['id']}", json={"status": "done"}))
+    world.a.close_milestone(pred["id"])
     after = world.a.milestone_row(succ["id"])
     assert (after["is_blocked"], after["blocked_by"], after["risk_level"], after["risk_reasons"]) == (False, [], "none", [])
     assert world.a.milestone_row(pred["id"])["risk_level"] == "none"
@@ -598,7 +604,7 @@ def test_schedule_conflict_is_flagged_until_predecessor_is_done(world):
     d = world.a.dependency(pred["id"], succ["id"])
     assert d["schedule_conflict"] is True
     assert "schedule_conflict" in world.a.milestone_row(succ["id"])["risk_reasons"]
-    ok(world.a.c.patch(f"/api/roadmap/milestones/{pred['id']}", json={"status": "done"}))
+    world.a.close_milestone(pred["id"])
     assert dep_row(world, d["id"])["schedule_conflict"] is False
 
 

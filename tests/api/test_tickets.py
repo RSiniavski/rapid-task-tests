@@ -673,7 +673,7 @@ def test_delete_recalculates_milestone_progress(world):
     assert world.a.milestone_row(m["id"])["progress"] == 50
     ok(world.a.c.delete(f"/api/tickets/{pending['id']}"), 204)
     row = world.a.milestone_row(m["id"])
-    assert (row["progress"], row["status"], row["tickets_total"]) == (100, "done", 1)
+    assert (row["progress"], row["status"], row["tickets_total"]) == (100, "in_progress", 1)
 
 
 # =================================================================== TICKET-13

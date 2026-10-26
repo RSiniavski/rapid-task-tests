@@ -67,7 +67,9 @@ PLAN = {
     "ROAD-11": "Auto progress / status",
     "ROAD-12": "Dependency state, risk, bottleneck, blocking",
     "ROAD-13": "Deep graphs and cyclic legacy data",
+    "ROAD-14": "Milestone manual closing: close/reopen, rules, permissions",
     "ROAD-FE": "Frontend roadmap flow",
+    "ROAD-FE-CLOSE": "Roadmap UI: close/reopen buttons, ready-to-close badge",
     # --- 7. UI cross-cutting
     "UI-01": "UK/EN localization",
     "UI-02": "Theme toggle",
