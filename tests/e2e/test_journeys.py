@@ -104,6 +104,8 @@ def test_e2e_06_roadmap_build_and_persist(page, login_ui, world):
     t = world.a.ticket(milestone_id=m1["id"])
     world.a.dependency(m1["id"], m2["id"])
     world.a.move(t["id"], "Done")
+    world.a.move(t["id"], "Done")
+    world.a.close_milestone(m1["id"])  # a milestone is finished only by a manual Close
     login_ui(world.roles.admin)
     r = Roadmap(page).open(world.a.id)
     expect(r.block("E6 first").locator(".rm-progress-fill")).to_have_attribute("style", re.compile("100%"))
