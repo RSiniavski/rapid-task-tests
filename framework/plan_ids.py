@@ -115,4 +115,13 @@ PLAN = {
     "LBL-06": "Board UI: label picker, pending chips, cards",
     "LBL-07": "Board filters: assignee avatars, panel, persistence",
     "LBL-08": "Initials avatars and card layout",
+    # --- 14. Backlog, board rule, shared create dialog
+    "BKL-01": "Ticket list scope: board shows only open milestones, all = backlog",
+    "BKL-02": "Ticket carries a short milestone description",
+    "BKL-03": "Child inherits milestone; closed milestone refuses new tickets",
+    "BKL-04": "Board UI: only tickets of open milestones, notice",
+    "BKL-05": "Backlog table: all tickets, empty state, row opens dialog",
+    "BKL-06": "Backlog search, sorting, filters, pagination, columns",
+    "BKL-07": "Backlog by-milestone view",
+    "BKL-08": "Create ticket from board, backlog and roadmap",
 }
