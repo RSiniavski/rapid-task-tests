@@ -81,3 +81,11 @@ class Roadmap:
 
     def block(self, title):
         return self.p.locator(".rm-block", has_text=title).first
+
+
+def pick_milestone(dialog, title):
+    """Choose a milestone in the shared Create/Edit ticket dialog (searchable single select)."""
+    box = dialog.locator("input[data-testid$='-milestone']")
+    box.click()
+    box.fill(title)
+    dialog.locator(".lp-list li", has_text=title).first.click()

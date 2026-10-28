@@ -3,16 +3,18 @@ import pytest
 from playwright.sync_api import expect
 
 from framework.factory import ok
-from pages.base import Board
+from pages.base import Board, pick_milestone
 
-pytestmark = [pytest.mark.ui, pytest.mark.needs_vue]
+pytestmark = [pytest.mark.ui, pytest.mark.needs_vue, pytest.mark.usefixtures("on_board")]
 
 DLG = ".modal-backdrop.open .modal"
 
 
-def open_create(page):
+def open_create(page, milestone="Board milestone"):
     page.get_by_role("button", name="＋ New ticket").click()
-    return page.locator(DLG)
+    dlg = page.locator(DLG)
+    pick_milestone(dlg, milestone)       # a ticket without a milestone would not be on the board
+    return dlg
 
 
 def picker(scope, testid):

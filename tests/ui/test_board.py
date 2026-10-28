@@ -5,9 +5,9 @@ import pytest
 from playwright.sync_api import expect
 
 from framework.factory import PNG_BYTES, ok
-from pages.base import Board
+from pages.base import Board, pick_milestone
 
-pytestmark = [pytest.mark.ui, pytest.mark.needs_vue]
+pytestmark = [pytest.mark.ui, pytest.mark.needs_vue, pytest.mark.usefixtures("on_board")]
 
 
 @pytest.mark.plan("TICKET-FE")
@@ -32,6 +32,7 @@ def test_create_ticket_via_dialog(page, login_ui, world):
     dlg.locator("input.input").first.fill("Created from UI")
     dlg.locator("select").first.select_option("Bug")
     dlg.locator("textarea").fill("some description")
+    pick_milestone(dlg, world.a.default_milestone["title"])
     dlg.get_by_role("button", name="Create ticket").click()
     expect(b.ticket("Created from UI")).to_be_visible()
     got = ok(world.a.c.get(f"/api/tickets/project/{world.a.id}")).json()
@@ -57,6 +58,7 @@ def test_create_with_subtasks_assignee_and_hierarchy(page, login_ui, world):
     dlg.locator("select").first.select_option("Epic")
     dlg.get_by_role("button", name="＋ Add subtask").click()
     dlg.locator(".subtask-title").first.fill("child one")
+    pick_milestone(dlg, world.a.default_milestone["title"])
     dlg.get_by_role("button", name="Create ticket").click()
     expect(b.ticket("child one")).to_be_visible()
     tickets = {t["title"]: t for t in ok(world.a.c.get(f"/api/tickets/project/{world.a.id}")).json()}
@@ -92,6 +94,8 @@ def test_permission_matrix_visible_in_edit_dialog(page, login_ui, world, role, w
     b = Board(page).open(world.a.id)
     b.ticket(title).click()
     dlg = page.locator(".modal-backdrop.open .modal")
+    # the dialog loads its data after it opens: wait until the ticket itself is shown
+    expect(dlg.locator(".crumb.self")).to_be_visible()
     assert (dlg.get_by_role("button", name="Save").count() == 1) is editable
     assert (dlg.get_by_role("button", name="Delete").count() == 1) is deletable
     if not editable:

@@ -59,7 +59,7 @@ def test_e2e_03_ticket_lifecycle_across_roles(world):
 
 @pytest.mark.plan("E2E-04")
 @pytest.mark.needs_vue
-def test_e2e_04_hierarchy_attachment_history_and_metrics_persist(page, login_ui, world, tmp_path):
+def test_e2e_04_hierarchy_attachment_history_and_metrics_persist(page, login_ui, world, tmp_path, on_board):
     epic = world.a.ticket(type="Epic", title="E4 epic", assignee_id=world.roles.editor.id)
     att = ok(world.a.c.upload(f"/api/attachments?project_id={world.a.id}", "e4.png", PNG_BYTES, "image/png"), 201).json()
     child = world.a.ticket(type="Task", title="E4 child", parent_id=epic["id"], attachment_ids=[att["id"]])
@@ -80,7 +80,7 @@ def test_e2e_04_hierarchy_attachment_history_and_metrics_persist(page, login_ui,
 
 @pytest.mark.plan("E2E-05")
 @pytest.mark.needs_vue
-def test_e2e_05_custom_columns_order_done_state_and_stats(page, login_ui, world):
+def test_e2e_05_custom_columns_order_done_state_and_stats(page, login_ui, world, on_board):
     c = world.a.c
     new = ok(c.post(f"/api/projects/{world.a.id}/columns", json={"name": "Shipped"}), 201).json()
     ok(c.patch(f"/api/projects/{world.a.id}/columns/{new['id']}", json={"is_done": True}))

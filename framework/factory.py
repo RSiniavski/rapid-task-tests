@@ -100,6 +100,7 @@ class Project:
         self.id: int = data["id"]
         self.key: str = data["key"]
         self.columns: Dict[str, int] = {c["name"]: c["id"] for c in data["columns"]}
+        self.default_milestone: Optional[dict] = None   # see use_default_milestone()
 
     @property
     def c(self) -> Client:
@@ -116,8 +117,17 @@ class Project:
     def ticket(self, client: Optional[Client] = None, **fields) -> dict:
         """Create a ticket (asserting 201). Defaults: Task titled with a random suffix."""
         payload = {"title": f"T {uid(6)}", "type": "Task"}
+        if self.default_milestone and "milestone_id" not in fields and "parent_id" not in fields:
+            payload["milestone_id"] = self.default_milestone["id"]
         payload.update(fields)
         return ok((client or self.c).post(f"/api/tickets/project/{self.id}", json=payload), 201).json()
+
+    def use_default_milestone(self, title: str = "Board milestone") -> dict:
+        """The board shows only tickets of OPEN milestones. After this call every ticket made with
+        ticket() lands in one open milestone (unless milestone_id/parent_id is given), so it is
+        visible on the board. Used by board UI tests."""
+        self.default_milestone = self.milestone(title=title)
+        return self.default_milestone
 
     def move(self, ticket_id: int, column: str, client: Optional[Client] = None):
         return ok((client or self.c).patch(f"/api/tickets/{ticket_id}/column",

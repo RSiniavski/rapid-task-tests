@@ -90,6 +90,12 @@ def world(roles):
 
 
 @pytest.fixture
+def on_board(world):
+    """Tickets of project A get an open milestone, so the board shows them (board rule)."""
+    return world.a.use_default_milestone()
+
+
+@pytest.fixture
 def make_user(base_url):
     """Factory for throw-away users: make_user(tag='x', full_name=None)."""
     def _make(**kw):
