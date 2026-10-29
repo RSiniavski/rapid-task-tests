@@ -124,4 +124,8 @@ PLAN = {
     "BKL-06": "Backlog search, sorting, filters, pagination, columns",
     "BKL-07": "Backlog by-milestone view",
     "BKL-08": "Create ticket from board, backlog and roadmap",
+    "LBL-09": "Label management API: admin only, project scoping",
+    "LBL-10": "Rename tag/component: names, duplicates, history, validation",
+    "LBL-11": "Delete tag/component, usage counts, clean-up of tickets",
+    "LBL-12": "Project settings Labels tab (UI)",
 }
