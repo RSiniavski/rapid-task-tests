@@ -73,7 +73,7 @@ def test_open_edit_save_changes_persist(page, login_ui, world):
     b.ticket("Old title").click()
     dlg = page.locator(".modal-backdrop.open .modal")
     dlg.locator("input.input").first.fill("New title")
-    dlg.locator("select").nth(1).select_option(label="In Progress")
+    dlg.get_by_test_id("ticket-fields").locator("select").nth(1).select_option(label="In Progress")
     dlg.get_by_role("button", name="Save").click()
     expect(b.ticket("New title")).to_be_visible()
     got = ok(world.a.c.get(f"/api/tickets/{t['id']}")).json()

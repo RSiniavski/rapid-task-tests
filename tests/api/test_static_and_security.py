@@ -8,7 +8,8 @@ from framework.config import PASSWORD
 
 pytestmark = pytest.mark.api
 
-PAGES = ["/", "/index.html", "/dashboard.html", "/board.html", "/roadmap.html", "/donate.html"]
+PAGES = ["/", "/index.html", "/dashboard.html", "/board.html", "/backlog.html", "/ticket.html",
+         "/roadmap.html", "/donate.html"]
 ASSET_RE = re.compile(r'(?:src|href)="(/[^"#?]+\.(?:js|css|svg|png|ico))')
 
 

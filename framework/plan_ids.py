@@ -128,4 +128,10 @@ PLAN = {
     "LBL-10": "Rename tag/component: names, duplicates, history, validation",
     "LBL-11": "Delete tag/component, usage counts, clean-up of tickets",
     "LBL-12": "Project settings Labels tab (UI)",
+    # --- 15. Ticket view: two columns, history, full page
+    "TKV-01": "Two-column layout of the edit and create dialogs",
+    "TKV-02": "Ticket history section",
+    "TKV-03": "Breadcrumb links",
+    "TKV-04": "Ticket page /ticket.html",
+    "TKV-05": "Roadmap: ticket chip opens the ticket dialog",
 }
