@@ -83,9 +83,14 @@ def test_quick_subtask_enter_does_not_save_the_ticket(page, login_ui, world, tic
     dlg.locator(".quick-add-row input").fill("typed child")
     dlg.locator(".quick-add-row input").press("Enter")
     expect(page.locator(DLG)).to_be_visible()                  # still open: Enter did not submit the form
-    kids = [t["title"] for t in ok(world.a.c.get(f"/api/tickets/project/{world.a.id}")).json()
-            if t["parent_id"] == epic["id"]]
-    assert kids == ["typed child"]
+    def kids():
+        return [t["title"] for t in ok(world.a.c.get(f"/api/tickets/project/{world.a.id}")).json()
+                if t["parent_id"] == epic["id"]]
+    for _ in range(40):                                        # the child is saved asynchronously
+        if kids():
+            break
+        page.wait_for_timeout(100)
+    assert kids() == ["typed child"]
 
 
 # ---------------------------------------------------------------- TKV-02 history
