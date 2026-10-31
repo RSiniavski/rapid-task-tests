@@ -9,7 +9,9 @@ import pytest
 from framework import config, report
 
 CDN_RE = re.compile(r"^https://(unpkg\.com|cdnjs\.cloudflare\.com)/.*")
-VENDOR_FILES = {"vue.global.prod.js": "vue.global.prod.js", "Sortable.min.js": "Sortable.min.js"}
+VENDOR_FILES = {"vue.global.prod.js": "vue.global.prod.js", "Sortable.min.js": "Sortable.min.js",
+                "marked.min.js": "marked.min.js", "purify.min.js": "purify.min.js",
+                "turndown.min.js": "turndown.min.js", "turndown-plugin-gfm.js": "turndown-plugin-gfm.js"}
 
 
 def vendor_ready() -> bool:

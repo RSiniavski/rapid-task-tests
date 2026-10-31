@@ -41,7 +41,7 @@ def test_edit_dialog_has_content_left_and_fields_right(page, login_ui, world, ti
     main, side = columns_of(page, DLG)
     assert main["x"] < side["x"] and abs(main["y"] - side["y"]) < 40
     expect(dlg.locator(".tk-main input.input").first).to_have_value("Two columns")
-    expect(dlg.locator(".tk-main textarea, .tk-main .desc-view").first).to_be_visible()
+    expect(dlg.locator(".tk-main [data-testid=desc-editor], .tk-main .desc-view").first).to_be_visible()
     fields = dlg.get_by_test_id("ticket-fields")
     for name in ("Type", "Status", "Milestone", "Assignee", "Tester", "Author", "Tags", "Components"):
         expect(fields.locator("label", has_text=name).first).to_be_visible()

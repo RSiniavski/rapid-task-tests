@@ -134,4 +134,9 @@ PLAN = {
     "TKV-03": "Breadcrumb links",
     "TKV-04": "Ticket page /ticket.html",
     "TKV-05": "Roadmap: ticket chip opens the ticket dialog",
+    "MD-01": "Markdown description is shown formatted",
+    "MD-02": "Dangerous markdown is neutralised",
+    "MD-03": "Ticket keys become cards",
+    "MD-04": "WYSIWYG editor: hotkeys, toolbar, shortcuts, saving as markdown",
+    "MD-05": "Editor permissions and the create dialog",
 }

@@ -31,12 +31,13 @@ def test_create_ticket_via_dialog(page, login_ui, world):
     dlg = page.locator(".modal-backdrop.open .modal")
     dlg.locator("input.input").first.fill("Created from UI")
     dlg.locator("select").first.select_option("Bug")
-    dlg.locator("textarea").fill("some description")
+    dlg.get_by_test_id("desc-editor").fill("some description")
     pick_milestone(dlg, world.a.default_milestone["title"])
     dlg.get_by_role("button", name="Create ticket").click()
     expect(b.ticket("Created from UI")).to_be_visible()
     got = ok(world.a.c.get(f"/api/tickets/project/{world.a.id}")).json()
     assert [(t["title"], t["type"], t["reporter"]["id"]) for t in got] == [("Created from UI", "Bug", world.roles.reporter.id)]
+    assert got[0]["description"] == "some description"
 
 
 @pytest.mark.plan("TICKET-FE")
