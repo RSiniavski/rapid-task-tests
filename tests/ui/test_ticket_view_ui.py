@@ -18,6 +18,11 @@ def open_ticket_page(page, key):
     return page
 
 
+def show_history(page):
+    """Comments and history share one section: switch the drop-down to History."""
+    page.get_by_test_id("activity-view").select_option("history")
+
+
 @pytest.fixture
 def ticket(world, on_board):
     return world.a.ticket(title="Two columns")
@@ -102,6 +107,7 @@ def test_history_lists_changes_newest_first_with_names(page, login_ui, world, ti
     ok(world.a.c.patch(f"/api/tickets/{t['id']}", json={"description": "secret text of the description"}))
     login_ui(world.roles.admin)
     open_ticket_page(page, t["key"])
+    show_history(page)
     rows = page.get_by_test_id("history-row")
     expect(rows.first).to_contain_text("Description")               # the newest change is on top
     expect(rows.first).not_to_contain_text("secret text")           # only "changed" is shown
@@ -116,6 +122,7 @@ def test_history_shows_first_ten_and_show_all(page, login_ui, world, ticket):
         ok(world.a.c.patch(f"/api/tickets/{ticket['id']}", json={"title": f"Title {i}"}))
     login_ui(world.roles.admin)
     open_ticket_page(page, ticket["key"])
+    show_history(page)
     expect(page.get_by_test_id("history-row")).to_have_count(10)
     page.get_by_test_id("history-more").click()
     expect(page.get_by_test_id("history-row")).to_have_count(13)   # 12 edits + the creation line
@@ -127,6 +134,7 @@ def test_read_only_user_sees_the_history_too(page, login_ui, world, ticket):
     world.a.move(ticket["id"], "In Progress")
     login_ui(world.roles.reporter)
     open_ticket_page(page, ticket["key"])
+    show_history(page)
     expect(page.get_by_test_id("history-row").first).to_be_visible()
 
 
@@ -195,6 +203,7 @@ def test_page_save_stays_on_the_page_and_shows_saved(page, login_ui, world, tick
     expect(page.get_by_test_id("ticket-saved")).to_be_visible()
     assert "/ticket.html" in page.url
     assert ok(world.a.c.get(f"/api/tickets/{ticket['id']}")).json()["title"] == "Renamed on page"
+    show_history(page)
     expect(page.get_by_test_id("history-row").first).to_contain_text("Title")
 
 
