@@ -149,4 +149,9 @@ PLAN = {
     "MD-03": "Ticket keys become cards",
     "MD-04": "WYSIWYG editor: hotkeys, toolbar, shortcuts, saving as markdown",
     "MD-05": "Editor permissions and the create dialog",
+    "MEN-01": "Mentions are stored as plain Markdown @[Name](user:ID)",
+    "MEN-02": "Members list for the @ dropdown: access, removed and deactivated users",
+    "MEN-03": "@ dropdown: open, filter, no match, Esc",
+    "MEN-04": "Picking a mention in a comment and in the description",
+    "MEN-05": "Mention chip display: active, removed and deactivated users, safe text",
 }
