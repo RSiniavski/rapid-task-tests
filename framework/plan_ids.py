@@ -106,6 +106,9 @@ PLAN = {
     "THEME-06": "Effective theme rules in the UI",
     "THEME-07": "Profile theme selector, import/export UI",
     "THEME-08": "Project Theme tab UI",
+    "THEME-09": "New presets: listed, unique, valid, importable",
+    "THEME-10": "Preset contrast rules (text, accent, status colours)",
+    "THEME-11": "New presets in the UI: apply, persist, match the server copy",
     # --- 13. Tags, components, board filters, initials avatars
     "LBL-01": "Tags/components API: auth, roles, validation, uniqueness",
     "LBL-02": "Ticket labels: create/update/history",
