@@ -48,12 +48,13 @@ class AppServer:
     """Either a locally spawned isolated instance or an external one (BASE_URL)."""
 
     def __init__(self, external_url: str = "", src: Optional[Path] = None, legacy_db: Optional[Path] = None,
-                 label: str = "main"):
+                 label: str = "main", env_overrides: Optional[dict] = None):
         self.external = bool(external_url)
         self._url = external_url
         self.src = src
         self.legacy_db = legacy_db
         self.label = label
+        self.env_overrides = dict(env_overrides or {})      # name -> value; None removes the variable
         self.workdir: Optional[Path] = None
         self.proc: Optional[subprocess.Popen] = None
         self.log_path: Optional[Path] = None
@@ -71,6 +72,10 @@ class AppServer:
     @property
     def db_path(self) -> Optional[Path]:
         return self.workdir / "rapid_task.db" if self.workdir else None
+
+    @property
+    def platform_db_path(self) -> Optional[Path]:
+        return self.workdir / "platform.db" if self.workdir else None
 
     @property
     def uploads_dir(self) -> Optional[Path]:
@@ -99,8 +104,15 @@ class AppServer:
         self.port = _free_port()
         self._url = f"http://127.0.0.1:{self.port}"
         self.log_path = self.workdir / f"server_{self.port}.log"
-        env = dict(os.environ, SECRET_KEY=config.SECRET_KEY, PYTHONDONTWRITEBYTECODE="1",
-                   NO_PROXY="127.0.0.1,localhost", no_proxy="127.0.0.1,localhost")
+        env = dict(os.environ, SECRET_KEY=config.SECRET_KEY, PYTHONDONTWRITEBYTECODE="1", PYTHONUNBUFFERED="1",
+                   NO_PROXY="127.0.0.1,localhost", no_proxy="127.0.0.1,localhost",
+                   PLATFORM_ROOT_USERNAME=config.PLATFORM_ROOT_USERNAME,
+                   PLATFORM_ROOT_PASSWORD=config.PLATFORM_ROOT_PASSWORD, PLATFORM_SECRET_KEY="")
+        for name, value in self.env_overrides.items():
+            if value is None:
+                env.pop(name, None)
+            else:
+                env[name] = value
         log = open(self.log_path, "wb")
         self.proc = subprocess.Popen(
             [config.APP_PYTHON, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1",
@@ -141,9 +153,12 @@ class AppServer:
         if cleanup and self.workdir and self.workdir.exists():
             shutil.rmtree(self.workdir, ignore_errors=True)
 
-    def restart(self) -> None:
-        """Stop and start the process again on the SAME database (idempotent start-up checks)."""
+    def restart(self, env_overrides: Optional[dict] = None) -> None:
+        """Stop and start the process again on the SAME database (idempotent start-up checks).
+        env_overrides (optional) replaces the extra environment of the new process."""
         assert self.is_local
+        if env_overrides is not None:
+            self.env_overrides = dict(env_overrides)
         self.stop(cleanup=False)
         self._spawn()
 

@@ -6,7 +6,7 @@ from framework.client import Client
 from framework.factory import Roles, build_world, register_user
 from framework.server import AppServer
 
-pytest_plugins = ["framework.report", "framework.ui_fixtures"]
+pytest_plugins = ["framework.report", "framework.ui_fixtures", "framework.platform_fixtures"]
 
 
 # ---------------------------------------------------------------- server / clients

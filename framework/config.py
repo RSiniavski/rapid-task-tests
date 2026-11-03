@@ -35,6 +35,12 @@ APP_PYTHON = os.getenv("APP_PYTHON", sys.executable)  # interpreter that has the
 SECRET_KEY = os.getenv("SECRET_KEY", "autotest-secret-key-not-for-production")
 SERVER_START_TIMEOUT = int(os.getenv("SERVER_START_TIMEOUT", "60"))
 
+# --- platform (admin tool): the root account the isolated test server is started with ---------------
+PLATFORM_ROOT_USERNAME = os.getenv("PLATFORM_ROOT_USERNAME", "autotest_root")
+PLATFORM_ROOT_PASSWORD = os.getenv("PLATFORM_ROOT_PASSWORD", "Root!Autotest-12345")
+PLATFORM_MAX_FAILED_LOGINS = 5          # mirrors of the app limits
+PLATFORM_LOCK_MINUTES = 15
+
 # --- browser -----------------------------------------------------------------------
 HEADLESS = os.getenv("HEADED", "0") != "1"
 SLOW_MO = int(os.getenv("SLOW_MO", "0"))
