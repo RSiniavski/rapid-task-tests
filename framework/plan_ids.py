@@ -171,4 +171,11 @@ PLAN = {
     "PLT-12": "Administrators tab: list, create, edit, block, password, delete (browser)",
     "PLT-13": "Audit log tab: events, filters, pages, readable details (browser)",
     "PLT-14": "platform.html: no script errors, no sideways scrolling, text is never HTML (browser)",
+    "PLT-15": "Platform users: list, search, status filter, counters, sorting, pages",
+    "PLT-16": "Platform users: permission, audit log lines, refused actions",
+    "PLT-17": "Platform users: block, unblock, last login, hidden fields",
+    "PLT-18": "Platform users: soft delete keeps the work, frees the address",
+    "PLT-19": "Users tab: list, search, status tabs and counters, sort, pages (browser)",
+    "PLT-20": "Users tab: block, unblock, delete question and delete (browser)",
+    "PLT-21": "Users tab: permission, audit log lines, text is never HTML (browser)",
 }

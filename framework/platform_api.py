@@ -41,3 +41,16 @@ def create_admin(root: Client, base_url: str, tag: str = "adm", password: str = 
 def audit(root: Client, **params) -> dict:
     params.setdefault("page_size", 100)
     return ok(root.get(f"{P}/audit", params=params)).json()
+
+
+# ---------------------------------------------------------------- the app's users, seen from the platform
+def users(client: Client, **params) -> dict:
+    params.setdefault("page_size", 100)
+    return ok(client.get(f"{P}/users", params=params)).json()
+
+
+def find_user(client: Client, user) -> dict:
+    """The platform row of an app user (found by the unique full name; the e-mail of a deleted user changes)."""
+    token = user.full_name.replace(" (Deactivated)", "")
+    rows = users(client, q=token)["items"]
+    return next(r for r in rows if r["id"] == user.id)
