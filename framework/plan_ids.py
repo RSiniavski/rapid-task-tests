@@ -178,4 +178,8 @@ PLAN = {
     "PLT-19": "Users tab: list, search, status tabs and counters, sort, pages (browser)",
     "PLT-20": "Users tab: block, unblock, delete question and delete (browser)",
     "PLT-21": "Users tab: permission, audit log lines, text is never HTML (browser)",
+    "PLT-22": "Platform health: permission, shape, disk, counts, no secrets",
+    "PLT-23": "Platform health: request counters, server errors, limits, uploads, restart",
+    "PLT-24": "System Health tab: server, databases, disk, counts, load, colors (browser)",
+    "PLT-25": "System Health tab: server errors, auto refresh, failed refresh, permission (browser)",
 }
