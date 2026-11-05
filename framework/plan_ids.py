@@ -182,4 +182,8 @@ PLAN = {
     "PLT-23": "Platform health: request counters, server errors, limits, uploads, restart",
     "PLT-24": "System Health tab: server, databases, disk, counts, load, colors (browser)",
     "PLT-25": "System Health tab: server errors, auto refresh, failed refresh, permission (browser)",
+    "PLT-26": "Platform overview: permission, shape, periods, totals",
+    "PLT-27": "Platform overview: numbers follow users, projects, tickets, comments, files, activity days",
+    "PLT-28": "Overview tab: tiles, line and bar charts, table view, periods (browser)",
+    "PLT-29": "Overview tab: tooltip, keyboard, failed refresh, permission (browser)",
 }

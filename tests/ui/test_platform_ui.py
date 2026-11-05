@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.ui, pytest.mark.needs_vue]
 ROOT = config.PLATFORM_ROOT_USERNAME
 DEFAULT_THEME = "rapid_task_dark_pastel"
 ALL_NAV = ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-admins", "nav-audit"]
-BUILT_NAV = ["nav-health", "nav-users", "nav-admins", "nav-audit"]                    # the sections that are real pages today
+BUILT_NAV = ["nav-health", "nav-overview", "nav-users", "nav-admins", "nav-audit"]                    # the sections that are real pages today
 
 
 def tid(page, name):
@@ -203,7 +203,7 @@ def test_the_menu_shows_only_what_the_permissions_allow(page, plogin_ui, padmin,
 def test_sections_that_are_not_built_yet_are_not_links(page, plogin_ui, proot):
     plogin_ui(proot)
     open_tool(page)
-    for name in ("nav-overview", "nav-insights"):
+    for name in ("nav-insights",):
         assert page.locator(f"a[data-testid='{name}']").count() == 0, name
         assert tid(page, name).locator(".pl-soon").count() == 1, name
     for name in BUILT_NAV:
@@ -355,7 +355,7 @@ def test_every_new_look_can_be_picked_without_breaking_the_page(page, plogin_ui,
 def test_walking_through_every_tab_throws_no_script_errors(page, plogin_ui, proot):
     plogin_ui(proot)
     open_tool(page)
-    for nav, shown in (("nav-health", "health-page"), ("nav-users", "users-page"), ("nav-admins", "admins-page"), ("nav-audit", "audit-page")):
+    for nav, shown in (("nav-health", "health-page"), ("nav-overview", "overview-page"), ("nav-users", "users-page"), ("nav-admins", "admins-page"), ("nav-audit", "audit-page")):
         tid(page, nav).click()
         expect(tid(page, shown)).to_be_visible()
         expect(tid(page, "platform-view-title")).not_to_have_text("My account")
@@ -367,7 +367,7 @@ def test_walking_through_every_tab_throws_no_script_errors(page, plogin_ui, proo
 
 @pytest.mark.plan("PLT-14")
 @pytest.mark.parametrize("width, height", [(390, 800), (768, 900), (1024, 768), (1366, 850), (1920, 1080)])
-@pytest.mark.parametrize("route", ["", "#/health", "#/users", "#/admins", "#/audit"], ids=["account", "health", "users", "admins", "audit"])
+@pytest.mark.parametrize("route", ["", "#/health", "#/overview", "#/users", "#/admins", "#/audit"], ids=["account", "health", "overview", "users", "admins", "audit"])
 def test_no_sideways_scrolling(page, plogin_ui, proot, width, height, route):
     page.set_viewport_size({"width": width, "height": height})
     plogin_ui(proot)
