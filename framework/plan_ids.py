@@ -186,4 +186,8 @@ PLAN = {
     "PLT-27": "Platform overview: numbers follow users, projects, tickets, comments, files, activity days",
     "PLT-28": "Overview tab: tiles, line and bar charts, table view, periods (browser)",
     "PLT-29": "Overview tab: tooltip, keyboard, failed refresh, permission (browser)",
+    "PLT-30": "Layout: default look, move by drag and keys, saved in the browser, reset, Health layout (browser)",
+    "PLT-31": "Layout: resize by drag and keys, limits, automatic height, never smaller than the content (browser)",
+    "PLT-32": "Layout: charts are drawn to the size of their tile (browser)",
+    "PLT-33": "Layout: edges jump to the neighbours, guide line, narrow screens (browser)",
 }
