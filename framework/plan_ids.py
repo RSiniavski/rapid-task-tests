@@ -190,4 +190,13 @@ PLAN = {
     "PLT-31": "Layout: resize by drag and keys, limits, automatic height, never smaller than the content (browser)",
     "PLT-32": "Layout: charts are drawn to the size of their tile (browser)",
     "PLT-33": "Layout: edges jump to the neighbours, guide line, narrow screens (browser)",
+    "PLT-34": "Project Insights API: list, search, status filter, counters, sort, pages",
+    "PLT-35": "Project Insights API: numbers, last activity, inactive and empty warnings",
+    "PLT-36": "Project Insights API: platform token, permissions, root-only actions",
+    "PLT-37": "Project Insights API: archive, restore, suspend, unsuspend (what the members see, audit log)",
+    "PLT-38": "Project Insights API: delete a project",
+    "PLT-39": "Project Insights (browser): row, search, status tabs and counters, sort, pages",
+    "PLT-40": "Project Insights (browser): inactive and empty warnings and chips",
+    "PLT-41": "Project Insights (browser): root actions - suspend, archive, restore, delete, dialogs, errors",
+    "PLT-42": "Project Insights (browser): read-only admin, audit log, safe text, list errors",
 }

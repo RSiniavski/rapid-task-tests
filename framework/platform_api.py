@@ -54,3 +54,14 @@ def find_user(client: Client, user) -> dict:
     token = user.full_name.replace(" (Deactivated)", "")
     rows = users(client, q=token)["items"]
     return next(r for r in rows if r["id"] == user.id)
+
+
+# ---------------------------------------------------------------- the app's projects, seen from the platform (Project Insights)
+def insight_projects(client: Client, **params) -> dict:
+    params.setdefault("page_size", 100)
+    return ok(client.get(f"{P}/insights/projects", params=params)).json()
+
+
+def find_project(client: Client, project) -> dict:
+    """The platform row of a project (found by its unique key)."""
+    return next(r for r in insight_projects(client, q=project.key)["items"] if r["id"] == project.id)

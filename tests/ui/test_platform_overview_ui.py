@@ -344,8 +344,9 @@ def test_a_first_load_error_has_try_again(page, plogin_ui, proot):
 def test_an_admin_with_analytics_works(page, plogin_ui, padmin):
     a = padmin("oa1", can_view_analytics=True)
     open_overview(page, plogin_ui, a)
-    assert page.locator("a[data-testid^='nav-']").count() == 1                                 # Overview; Project Insights is not built yet
+    assert page.locator("a[data-testid^='nav-']").count() == 2                                 # Overview and Project Insights
     expect(tid(page, "nav-overview")).to_be_visible()
+    expect(tid(page, "nav-insights")).to_be_visible()
 
 
 @pytest.mark.plan("PLT-29")

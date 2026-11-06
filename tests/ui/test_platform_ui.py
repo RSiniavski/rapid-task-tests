@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.ui, pytest.mark.needs_vue]
 ROOT = config.PLATFORM_ROOT_USERNAME
 DEFAULT_THEME = "rapid_task_dark_pastel"
 ALL_NAV = ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-admins", "nav-audit"]
-BUILT_NAV = ["nav-health", "nav-overview", "nav-users", "nav-admins", "nav-audit"]                    # the sections that are real pages today
+BUILT_NAV = ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-admins", "nav-audit"]    # the sections that are real pages today
 
 
 def tid(page, name):
@@ -200,14 +200,12 @@ def test_the_menu_shows_only_what_the_permissions_allow(page, plogin_ui, padmin,
 
 
 @pytest.mark.plan("PLT-10")
-def test_sections_that_are_not_built_yet_are_not_links(page, plogin_ui, proot):
+def test_every_section_is_a_real_link(page, plogin_ui, proot):
     plogin_ui(proot)
     open_tool(page)
-    for name in ("nav-insights",):
-        assert page.locator(f"a[data-testid='{name}']").count() == 0, name
-        assert tid(page, name).locator(".pl-soon").count() == 1, name
     for name in BUILT_NAV:
         assert page.locator(f"a[data-testid='{name}']").count() == 1, name
+        assert tid(page, name).locator(".pl-soon").count() == 0, name
 
 
 @pytest.mark.plan("PLT-10")
