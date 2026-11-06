@@ -152,6 +152,8 @@ PLAN = {
     "MD-03": "Ticket keys become cards",
     "MD-04": "WYSIWYG editor: hotkeys, toolbar, shortcuts, saving as markdown",
     "MD-05": "Editor permissions and the create dialog",
+    "MOD-01": "Dialogs: selecting text and letting go outside the dialog does not close it",
+    "MOD-02": "Dialogs: a real click on the background closes; press outside and release inside does not",
     "MEN-01": "Mentions are stored as plain Markdown @[Name](user:ID)",
     "MEN-02": "Members list for the @ dropdown: access, removed and deactivated users",
     "MEN-03": "@ dropdown: open, filter, no match, Esc",
