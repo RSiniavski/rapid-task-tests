@@ -2,6 +2,7 @@
 import pytest
 
 from framework import config
+from framework.factory import ok
 from framework.platform_api import P, create_admin, login_client
 from framework.server import AppServer
 
@@ -61,3 +62,16 @@ def plogin_ui(context):
         token = getattr(who, "token", None) or who.client.token
         seed_session(context, None, "en", extra_local={"rt_platform_token": token, **local})
     return _login
+
+
+@pytest.fixture
+def donate_live(proot):
+    """The system Donate page is published for the test and put back to a draft after it."""
+    pages = ok(proot.get(f"{P}/pages")).json()
+    row = next(p for p in pages if p["slug"] == "donate")
+    was_published = row["status"] == "published"
+    if not was_published:
+        ok(proot.post(f"{P}/pages/{row['id']}/publish"))
+    yield row
+    if not was_published:
+        proot.post(f"{P}/pages/{row['id']}/unpublish")

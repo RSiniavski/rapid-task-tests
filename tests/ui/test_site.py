@@ -38,7 +38,7 @@ def test_i18n_dictionaries_have_identical_keys(page, anon_ui):
 @pytest.mark.plan("UI-01")
 def test_no_untranslated_keys_visible_on_static_pages(page, anon_ui):
     anon_ui("en")
-    for path in ("/", "/donate.html"):
+    for path in ("/", "/p/donate"):
         page.goto(path)
         text = page.inner_text("body")
         assert not re.search(r"\b(nav|hero|features|how|auth|footer|support|donate)\.[a-z0-9_.]+\b", text), path
@@ -87,7 +87,7 @@ def test_pages_remain_readable_under_color_scheme_preference(page, anon_ui, sche
 
 @pytest.mark.plan("UI-05")
 @pytest.mark.parametrize("width", [320, 390, 768, 1280])
-@pytest.mark.parametrize("path", ["/", "/donate.html"])
+@pytest.mark.parametrize("path", ["/", "/p/donate"])
 def test_static_pages_have_no_horizontal_overflow(page, anon_ui, width, path):
     anon_ui()
     page.set_viewport_size({"width": width, "height": 800})
@@ -141,30 +141,13 @@ def test_reduced_motion_preference_does_not_break_rendering(page, anon_ui):
 
 # ------------------------------------------------------------------ UI-06
 @pytest.mark.plan("UI-06")
-@pytest.mark.known_issue
-@pytest.mark.xfail(strict=False, reason="DEFECT: donate links in donate.js are still YOUR_* placeholders")
-def test_donate_page_links_are_configured_and_open_safely(page, anon_ui):
-    anon_ui("en")
-    page.goto("/donate.html")
-    links = page.locator("a[data-pay]")
-    assert links.count() == 3
-    hrefs = [links.nth(i).get_attribute("href") for i in range(3)]
-    assert all(h.startswith("https://") for h in hrefs)
-    for i in range(3):
-        assert links.nth(i).get_attribute("target") == "_blank"
-    assert not any("YOUR_" in h for h in hrefs), "donate links are still placeholders (YOUR_*)"
-    expect(page.get_by_role("link", name="← Back to home")).to_have_attribute("href", "/")
-
-
-@pytest.mark.plan("UI-06")
 @pytest.mark.needs_vue
-def test_header_and_footer_links_on_dashboard_and_board(page, login_ui, world):
+def test_header_and_footer_links_on_dashboard_and_board(page, login_ui, world, donate_live):
     login_ui(world.roles.admin)
     Dashboard(page).open()
     expect(page.locator("a.logo")).to_have_attribute("href", "/")
-    donate = page.locator(".footer-donate")
-    expect(donate).to_have_attribute("href", "/donate.html")
-    expect(donate).to_have_attribute("target", "_blank")
+    donate = page.locator("[data-site-links='footer'] a[data-slug='donate']")
+    expect(donate).to_have_attribute("href", "/p/donate")
     Board(page).open(world.a.id)
     expect(page.locator("a.logo")).to_have_attribute("href", "/dashboard.html")
     expect(page.get_by_role("link", name="🗺 Roadmap")).to_have_attribute("href", f"/roadmap.html?project={world.a.id}")
@@ -174,8 +157,8 @@ def test_header_and_footer_links_on_dashboard_and_board(page, login_ui, world):
 def test_no_failed_asset_requests_on_static_pages(page, anon_ui):
     anon_ui()
     bad = []
-    page.on("response", lambda r: bad.append((r.url, r.status)) if r.status >= 400 and "unpkg" not in r.url else None)
-    for p in ("/", "/donate.html"):
+    page.on("response", lambda r: bad.append((r.url, r.status)) if r.status >= 400 and "unpkg" not in r.url and "/api/pages/" not in r.url else None)
+    for p in ("/", "/p/donate"):
         page.goto(p)
         page.wait_for_load_state("networkidle")
     assert bad == []

@@ -110,7 +110,7 @@ def test_create_dialog_starts_empty_with_a_disabled_button(page, plogin_ui, proo
     expect(tid(page, "admin-modal-title")).to_have_text("New administrator")
     expect(tid(page, "admin-save")).to_be_disabled()
     expect(tid(page, "admin-username")).to_be_focused()
-    assert page.locator("[data-testid^='admin-perm-']").count() == 5
+    assert page.locator("[data-testid^='admin-perm-']").count() == 6
     assert page.locator("[data-testid^='admin-perm-']:checked").count() == 0
     expect(tid(page, "admin-password-input")).to_have_attribute("type", "password")
 

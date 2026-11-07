@@ -6,7 +6,7 @@ from framework.factory import ok, uid
 
 P = "/api/platform"
 PERMS = ["can_view_system_health", "can_view_analytics", "can_manage_users", "can_manage_projects",
-         "can_view_audit_logs"]
+         "can_view_audit_logs", "can_manage_pages"]
 ADMIN_PASSWORD = "Adm!n-Passw0rd-1"
 
 

@@ -11,8 +11,8 @@ pytestmark = [pytest.mark.ui, pytest.mark.needs_vue]
 
 ROOT = config.PLATFORM_ROOT_USERNAME
 DEFAULT_THEME = "rapid_task_dark_pastel"
-ALL_NAV = ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-admins", "nav-audit"]
-BUILT_NAV = ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-admins", "nav-audit"]    # the sections that are real pages today
+ALL_NAV = ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-admins", "nav-pages", "nav-audit"]
+BUILT_NAV = ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-admins", "nav-pages", "nav-audit"]    # the sections that are real pages today
 
 
 def tid(page, name):
@@ -175,10 +175,10 @@ def test_root_sees_every_section_and_all_permissions(page, plogin_ui, proot):
     open_tool(page)
     assert nav_ids(page) == ALL_NAV
     expect(tid(page, "platform-role")).to_have_text("ROOT")
-    expect(tid(page, "platform-perm-count")).to_contain_text("5 of 5")
+    expect(tid(page, "platform-perm-count")).to_contain_text("6 of 6")
     expect(tid(page, "profile-role")).to_have_text("Root")
     assert ".env" not in tid(page, "platform-account").inner_text()
-    assert page.locator("[data-testid^='perm-'][data-on='true']").count() == 5
+    assert page.locator("[data-testid^='perm-'][data-on='true']").count() == 6
 
 
 @pytest.mark.plan("PLT-10")
@@ -187,8 +187,9 @@ def test_root_sees_every_section_and_all_permissions(page, plogin_ui, proot):
     ({"can_manage_users": True}, ["nav-users"]),
     ({"can_view_analytics": True}, ["nav-overview", "nav-insights"]),
     ({"can_view_system_health": True, "can_view_audit_logs": True}, ["nav-health", "nav-audit"]),
-    ({f: True for f in PERMS}, ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-audit"]),
-], ids=["none", "users", "analytics", "health+audit", "all-five-but-not-root"])
+    ({"can_manage_pages": True}, ["nav-pages"]),
+    ({f: True for f in PERMS}, ["nav-health", "nav-overview", "nav-users", "nav-insights", "nav-pages", "nav-audit"]),
+], ids=["none", "users", "analytics", "health+audit", "pages", "all-but-not-root"])
 def test_the_menu_shows_only_what_the_permissions_allow(page, plogin_ui, padmin, flags, expected):
     a = padmin("um1", **flags)
     plogin_ui(a)
@@ -196,7 +197,7 @@ def test_the_menu_shows_only_what_the_permissions_allow(page, plogin_ui, padmin,
     assert nav_ids(page) == expected
     assert "nav-admins" not in nav_ids(page)                                   # Administrators is for root only
     expect(tid(page, "platform-role")).to_have_text("ADMIN")
-    expect(tid(page, "platform-perm-count")).to_contain_text(f"{len(flags)} of 5")
+    expect(tid(page, "platform-perm-count")).to_contain_text(f"{len(flags)} of 6")
 
 
 @pytest.mark.plan("PLT-10")
@@ -353,7 +354,7 @@ def test_every_new_look_can_be_picked_without_breaking_the_page(page, plogin_ui,
 def test_walking_through_every_tab_throws_no_script_errors(page, plogin_ui, proot):
     plogin_ui(proot)
     open_tool(page)
-    for nav, shown in (("nav-health", "health-page"), ("nav-overview", "overview-page"), ("nav-users", "users-page"), ("nav-admins", "admins-page"), ("nav-audit", "audit-page")):
+    for nav, shown in (("nav-health", "health-page"), ("nav-overview", "overview-page"), ("nav-users", "users-page"), ("nav-admins", "admins-page"), ("nav-pages", "pages-page"), ("nav-audit", "audit-page")):
         tid(page, nav).click()
         expect(tid(page, shown)).to_be_visible()
         expect(tid(page, "platform-view-title")).not_to_have_text("My account")

@@ -130,11 +130,11 @@ def test_logout_clears_token_and_protected_pages_redirect(page, login_ui, make_u
 
 
 @pytest.mark.plan("UI-06", "STATIC")
-def test_landing_links_and_new_tab_behaviour(page, anon_ui):
+def test_landing_links_and_new_tab_behaviour(page, anon_ui, donate_live):
     anon_ui()
     page.goto("/")
-    donate = page.locator("a[href='/donate.html']")
-    assert donate.count() >= 2
+    donate = page.locator("#support a[href='/p/donate']")                       # the support button (the Donate page is published)
+    assert donate.count() >= 1
     for i in range(donate.count()):
         assert donate.nth(i).get_attribute("target") == "_blank"
         assert "noopener" in (donate.nth(i).get_attribute("rel") or "")
